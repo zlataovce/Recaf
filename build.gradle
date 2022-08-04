@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.VersionsPlugin
 
 plugins {
     id "com.github.ben-manes.versions" version "0.42.0"
+    id "maven-publish"
 }
 
 allprojects {
@@ -11,6 +12,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
     apply plugin: 'checkstyle'
     apply plugin: VersionsPlugin
 
@@ -46,6 +48,27 @@ subprojects {
         maven { url 'https://files.minecraftforge.net/maven' }
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.quiltmc.org/repository/release/' }
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+            maven {
+                def releasesRepoUrl = 'https://repo.kcra.me/releases'
+                def snapshotsRepoUrl = 'https://repo.kcra.me/snapshots'
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+                credentials {
+                    username = System.getenv("REPO_USERNAME")
+                    password = System.getenv("REPO_PASSWORD")
+                }
+            }
+        }
     }
 
     gradle.projectsEvaluated {
